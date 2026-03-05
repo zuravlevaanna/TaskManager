@@ -70,6 +70,43 @@ class Task:
     def completed_at(self):
         return self.__completed_at
 
+    # Статические методы
+    @staticmethod
+    def validate_priority(priority):
+        """Проверяет корректность приоритета"""
+        valid_priorities = ["низкий", "средний", "высокий"]
+        return priority in valid_priorities
+
+    @staticmethod
+    def get_priority_emoji(priority):
+        """Возвращает эмодзи для приоритета"""
+        emojis = {
+            "низкий": "⬇️",
+            "средний": "➡️",
+            "высокий": "⬆️"
+        }
+        return emojis.get(priority, "❓")
+
+    @classmethod
+    def create_from_string(cls, task_string: str):
+        """
+        Создает задачу из строки формата: "Название | Описание | Приоритет"
+        """
+        try:
+            parts = task_string.split('|')
+            title = parts[0].strip()
+            description = parts[1].strip() if len(parts) > 1 else ""
+            priority = parts[2].strip() if len(parts) > 2 else "средний"
+
+            if not cls.validate_priority(priority):
+                print(f"Приоритет '{priority}' некорректен, установлен 'средний'")
+                priority = "средний"
+
+            return cls(title, description, priority)
+        except Exception as e:
+            print(f"Ошибка создания задачи из строки: {e}")
+            return None
+
     def mark_completed(self):
         """Отметить задачу как выполненную"""
         if not self.__completed:
@@ -94,7 +131,7 @@ class Task:
         """Полная информация о задаче"""
         info = f"Задача: {self.__title}\n"
         info += f"Описание: {self.__description}\n"
-        info += f"Приоритет: {self.__priority}\n"
+        info += f"Приоритет: {self.__priority} {self.get_priority_emoji(self.__priority)}\n"
         info += f"Создана: {self.__created_at.strftime('%d.%m.%Y %H:%M')}\n"
 
         if self.__completed:
@@ -103,6 +140,7 @@ class Task:
             info += "Статус: Не выполнена"
 
         return info
+
 
 class ImportantTask(Task):
     """Класс для важных задач (наследник Task)"""
